@@ -624,6 +624,12 @@ function renderVariableList() {
 function renderObjectUsage() {
   const container = $('#object-usage');
 
+  // 恢复选中状态
+  const defaultScope = config.settings?.defaultApplyScope || 'current_reply_character';
+  $$('.object-card').forEach(card => {
+    card.classList.toggle('selected', card.dataset.scope === defaultScope);
+  });
+
   if (config.values.length === 0) {
     container.innerHTML = '<div class="empty-state">添加变量后显示使用统计</div>';
     return;
@@ -642,9 +648,9 @@ function renderObjectUsage() {
   });
 
   container.innerHTML = Object.entries(scopeCounts).map(([scope, count]) => `
-    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
-      <span>${scopeLabels[scope] || scope}</span>
-      <span style="font-weight: 600;">${count} 个变量</span>
+    <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border);">
+      <span style="font-weight: 500;">${scopeLabels[scope] || scope}</span>
+      <span style="font-weight: 700; color: var(--primary);">${count} 个变量</span>
     </div>
   `).join('');
 }
@@ -846,6 +852,9 @@ function openVariableModal(index = null) {
   const modal = $('#modal-variable');
   const title = $('#modal-title');
 
+  // 获取默认作用对象
+  const defaultScope = config.settings?.defaultApplyScope || 'current_reply_character';
+
   if (index !== null && config.values[index]) {
     // 编辑模式
     currentEditingVariable = index;
@@ -857,7 +866,7 @@ function openVariableModal(index = null) {
     $('#var-desc').value = v.description || '';
     $('#var-kind').value = v.valueKind || 'score';
     $('#var-semantic').value = v.semanticType || 'relationship';
-    $('#var-scope').value = v.applyScope || 'all_chat_characters';
+    $('#var-scope').value = v.applyScope || defaultScope;
     $('#var-default').value = v.defaultValue ?? 50;
     $('#var-min').value = v.min ?? 0;
     $('#var-max').value = v.max ?? 100;
@@ -891,7 +900,7 @@ function openVariableModal(index = null) {
     $('#var-desc').value = '';
     $('#var-kind').value = 'score';
     $('#var-semantic').value = 'relationship';
-    $('#var-scope').value = 'all_chat_characters';
+    $('#var-scope').value = defaultScope;
     $('#var-default').value = 50;
     $('#var-min').value = 0;
     $('#var-max').value = 100;
@@ -1567,5 +1576,24 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (kind === 'text') {
       displaySelect.value = 'text';
     }
+  });
+
+  // 对象卡片点击选择
+  $$('.object-card').forEach(card => {
+    card.addEventListener('click', function() {
+      const scope = this.dataset.scope;
+
+      // 更新选中状态
+      $$('.object-card').forEach(c => c.classList.remove('selected'));
+      this.classList.add('selected');
+
+      // 保存默认作用对象到配置
+      if (!config.settings) config.settings = {};
+      config.settings.defaultApplyScope = scope;
+      config.updatedAt = new Date().toISOString();
+      saveToStorage();
+
+      showToast('已设置默认作用对象', 'success');
+    });
   });
 });
