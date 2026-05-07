@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tavo 数值系统配置器</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo">
+        <h1>Tavo 配置器</h1>
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item active" data-page="overview">
+          <span class="icon">📊</span>
+          <span>总览</span>
+        </li>
+        <li class="nav-item" data-page="variables">
+          <span class="icon">📈</span>
+          <span>变量</span>
+        </li>
+        <li class="nav-item" data-page="objects">
+          <span class="icon">👤</span>
+          <span>对象</span>
+        </li>
+        <li class="nav-item" data-page="rules">
+          <span class="icon">⚙️</span>
+          <span>规则</span>
+        </li>
+        <li class="nav-item" data-page="preview">
+          <span class="icon">👁️</span>
+          <span>预览</span>
+        </li>
+        <li class="nav-item" data-page="export">
+          <span class="icon">📦</span>
+          <span>导出</span>
+        </li>
+      </ul>
+      <div class="sidebar-footer">
+        <button id="btn-new" class="btn btn-outline">新建配置</button>
+        <button id="btn-import" class="btn btn-outline">导入配置</button>
+      </div>
+    </nav>
+
+    <main class="content">
+      <!-- 总览页面 -->
+      <section id="page-overview" class="page active">
+        <div class="page-header">
+          <h2>配置总览</h2>
+          <div class="actions">
+            <button id="btn-save-draft" class="btn btn-secondary">保存草稿</button>
+            <button id="btn-export-quick" class="btn btn-primary">导出配置</button>
+          </div>
+        </div>
+        <div class="overview-grid">
+          <div class="card">
+            <div class="card-label">配置名称</div>
+            <input type="text" id="config-name" class="input" placeholder="输入配置名称" value="默认数值配置">
+          </div>
+          <div class="card">
+            <div class="card-label">题材类型</div>
+            <select id="config-genre" class="input">
+              <option value="modern">现代日常</option>
+              <option value="fantasy">西幻冒险</option>
+              <option value="romance">恋爱互动</option>
+              <option value="survival">生存探索</option>
+              <option value="ensemble">群像剧情</option>
+              <option value="custom">自定义</option>
+            </select>
+          </div>
+          <div class="card stat">
+            <div class="card-label">变量数量</div>
+            <div class="stat-value" id="stat-variables">0</div>
+          </div>
+          <div class="card stat">
+            <div class="card-label">自动判断变量</div>
+            <div class="stat-value" id="stat-auto-judge">0</div>
+          </div>
+          <div class="card stat">
+            <div class="card-label">作用对象</div>
+            <div class="stat-value" id="stat-objects">0</div>
+          </div>
+          <div class="card stat">
+            <div class="card-label">校验状态</div>
+            <div class="stat-value" id="stat-validation">-</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>快速开始</h3>
+          <div class="template-grid">
+            <button class="template-btn" data-template="blank">
+              <span class="template-icon">📄</span>
+              <span>空白配置</span>
+            </button>
+            <button class="template-btn" data-template="modern">
+              <span class="template-icon">🏙️</span>
+              <span>现代日常</span>
+            </button>
+            <button class="template-btn" data-template="fantasy">
+              <span class="template-icon">⚔️</span>
+              <span>西幻冒险</span>
+            </button>
+            <button class="template-btn" data-template="romance">
+              <span class="template-icon">💕</span>
+              <span>恋爱互动</span>
+            </button>
+            <button class="template-btn" data-template="survival">
+              <span class="template-icon">🏕️</span>
+              <span>生存探索</span>
+            </button>
+            <button class="template-btn" data-template="ensemble">
+              <span class="template-icon">🎭</span>
+              <span>群像剧情</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>校验结果</h3>
+          <div id="validation-results" class="validation-results">
+            <div class="validation-empty">暂无校验结果，添加变量后自动校验</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 变量页面 -->
+      <section id="page-variables" class="page">
+        <div class="page-header">
+          <h2>变量管理</h2>
+          <button id="btn-add-variable" class="btn btn-primary">+ 新增变量</button>
+        </div>
+        <div id="variable-list" class="variable-list">
+          <div class="empty-state">
+            <p>暂无变量，点击上方按钮添加</p>
+            <p class="hint">或从模板快速开始</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 对象页面 -->
+      <section id="page-objects" class="page">
+        <div class="page-header">
+          <h2>作用对象</h2>
+        </div>
+        <div class="object-info">
+          <p class="hint">作用对象定义变量的归属范围，不是当前聊天的真实角色列表</p>
+        </div>
+        <div class="object-grid">
+          <div class="object-card selected" data-scope="current_reply_character">
+            <div class="object-icon">💬</div>
+            <div class="object-name">当前回复角色</div>
+            <div class="object-desc">变量绑定到当前 AI 回复的角色</div>
+          </div>
+          <div class="object-card" data-scope="all_chat_characters">
+            <div class="object-icon">👥</div>
+            <div class="object-name">所有聊天角色</div>
+            <div class="object-desc">每个聊天角色各自独立一份实例</div>
+          </div>
+          <div class="object-card" data-scope="user">
+            <div class="object-icon">🎮</div>
+            <div class="object-name">用户/玩家</div>
+            <div class="object-desc">变量绑定到玩家自身</div>
+          </div>
+          <div class="object-card" data-scope="global">
+            <div class="object-icon">🌍</div>
+            <div class="object-name">全局</div>
+            <div class="object-desc">整个聊天共享一个值</div>
+          </div>
+        </div>
+        <div class="section">
+          <h3>对象使用统计</h3>
+          <div id="object-usage" class="object-usage">
+            <div class="empty-state">添加变量后显示使用统计</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 规则页面 -->
+      <section id="page-rules" class="page">
+        <div class="page-header">
+          <h2>规则配置</h2>
+        </div>
+        <div class="section">
+          <h3>全局设置</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>置信度阈值</label>
+              <input type="range" id="confidence-threshold" min="0" max="1" step="0.1" value="0.6">
+              <span id="confidence-value">0.6</span>
+            </div>
+            <div class="form-group">
+              <label>每条消息最大事件数</label>
+              <input type="number" id="max-events" class="input" value="3" min="1" max="10">
+            </div>
+            <div class="form-group">
+              <label>最大日志条数</label>
+              <input type="number" id="max-logs" class="input" value="100" min="10" max="1000">
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>自动判断变量</h3>
+          <div id="auto-judge-list" class="auto-judge-list">
+            <div class="empty-state">添加启用自动判断的变量后显示</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>明确事件覆盖 <span class="badge">高级</span></h3>
+          <div class="collapse-header" data-target="explicit-events">
+            <span>展开配置</span>
+            <span class="arrow">▼</span>
+          </div>
+          <div id="explicit-events" class="collapse-content">
+            <div class="empty-state">
+              <p>明确事件优先级高于自动判断</p>
+              <button id="btn-add-explicit" class="btn btn-secondary">+ 添加明确事件</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 预览页面 -->
+      <section id="page-preview" class="page">
+        <div class="page-header">
+          <h2>预览</h2>
+        </div>
+        <div class="preview-tabs">
+          <button class="preview-tab active" data-tab="panel">状态面板</button>
+          <button class="preview-tab" data-tab="worldbook">世界书</button>
+          <button class="preview-tab" data-tab="protocol">AI 协议</button>
+        </div>
+        <div id="preview-content" class="preview-content">
+          <div class="preview-empty">添加变量后预览配置效果</div>
+        </div>
+      </section>
+
+      <!-- 导出页面 -->
+      <section id="page-export" class="page">
+        <div class="page-header">
+          <h2>导出配置</h2>
+        </div>
+        <div class="export-options">
+          <div class="export-card">
+            <h3>下载 JSON 文件</h3>
+            <p>下载配置包到本地</p>
+            <button id="btn-download" class="btn btn-primary">下载文件</button>
+          </div>
+          <div class="export-card">
+            <h3>复制 JSON 文本</h3>
+            <p>复制到剪贴板，粘贴使用</p>
+            <button id="btn-copy" class="btn btn-secondary">复制文本</button>
+          </div>
+        </div>
+        <div class="section">
+          <h3>配置包预览</h3>
+          <pre id="json-preview" class="json-preview"></pre>
+        </div>
+        <div class="section">
+          <h3>导入配置</h3>
+          <div class="import-area">
+            <input type="file" id="file-import" accept=".json" style="display: none">
+            <button id="btn-import-file" class="btn btn-outline">选择文件导入</button>
+            <span class="hint">或粘贴 JSON 到下方</span>
+            <textarea id="import-text" class="input" rows="4" placeholder='粘贴 JSON 配置...'></textarea>
+            <button id="btn-import-text" class="btn btn-secondary">从文本导入</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 变量编辑模态框 -->
+  <div id="modal-variable" class="modal">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3 id="modal-title">编辑变量</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="tabs">
+          <button class="tab active" data-tab="basic">基本信息</button>
+          <button class="tab" data-tab="judge">判断标准</button>
+          <button class="tab" data-tab="stages">阶段配置</button>
+          <button class="tab" data-tab="advanced">高级设置</button>
+        </div>
+
+        <!-- 基本信息 -->
+        <div id="tab-basic" class="tab-content active">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>变量 ID *</label>
+              <input type="text" id="var-id" class="input" placeholder="v_favor">
+              <span class="hint">英文、数字、下划线</span>
+            </div>
+            <div class="form-group">
+              <label>变量名称 *</label>
+              <input type="text" id="var-name" class="input" placeholder="好感度">
+            </div>
+            <div class="form-group full">
+              <label>描述</label>
+              <textarea id="var-desc" class="input" rows="2" placeholder="变量的用途说明"></textarea>
+            </div>
+            <div class="form-group">
+              <label>数据形态</label>
+              <select id="var-kind" class="input">
+                <option value="score">分数/程度</option>
+                <option value="quantity">数量/库存</option>
+                <option value="status">状态/枚举</option>
+                <option value="flag">开关/标记</option>
+                <option value="text">文本备注</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>语义类型</label>
+              <select id="var-semantic" class="input">
+                <option value="relationship">关系</option>
+                <option value="resource">资源</option>
+                <option value="state">状态</option>
+                <option value="progress">进度</option>
+                <option value="other">其他</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>作用对象</label>
+              <select id="var-scope" class="input">
+                <option value="current_reply_character">当前回复角色</option>
+                <option value="all_chat_characters">所有聊天角色</option>
+                <option value="user">用户/玩家</option>
+                <option value="global">全局</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>默认值</label>
+              <input type="number" id="var-default" class="input" value="50">
+            </div>
+            <div class="form-group">
+              <label>最小值</label>
+              <input type="number" id="var-min" class="input" value="0">
+            </div>
+            <div class="form-group">
+              <label>最大值</label>
+              <input type="number" id="var-max" class="input" value="100">
+            </div>
+            <div class="form-group">
+              <label>单位</label>
+              <input type="text" id="var-unit" class="input" placeholder="如: 金币、%">
+            </div>
+            <div class="form-group">
+              <label>显示模式</label>
+              <select id="var-display" class="input">
+                <option value="bar">进度条</option>
+                <option value="number">数字</option>
+                <option value="text">文本</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="var-auto-judge" checked>
+              启用自动判断
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="var-inject" checked>
+              注入给 AI
+            </label>
+          </div>
+        </div>
+
+        <!-- 判断标准 -->
+        <div id="tab-judge" class="tab-content">
+          <div class="form-group">
+            <label>变化速度</label>
+            <select id="var-speed" class="input">
+              <option value="slow">慢 (1-1, 1-2, 2-4)</option>
+              <option value="standard" selected>标准 (1-3, 4-7, 8-12)</option>
+              <option value="fast">快 (2-5, 6-12, 13-20)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>判断风格</label>
+            <select id="var-judge-style" class="input">
+              <option value="standard">标准</option>
+              <option value="strict">严格</option>
+              <option value="loose">宽松</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>正面原则</label>
+            <textarea id="var-positive" class="input" rows="2" placeholder="什么行为会导致正向变化"></textarea>
+          </div>
+          <div class="form-group">
+            <label>负面原则</label>
+            <textarea id="var-negative" class="input" rows="2" placeholder="什么行为会导致负向变化"></textarea>
+          </div>
+          <div class="form-group">
+            <label>无变化原则</label>
+            <textarea id="var-nochange" class="input" rows="2" placeholder="什么行为不会导致变化"></textarea>
+          </div>
+          <div class="form-group">
+            <label>小变化说明</label>
+            <input type="text" id="var-intensity-small" class="input" placeholder="轻微影响">
+          </div>
+          <div class="form-group">
+            <label>中变化说明</label>
+            <input type="text" id="var-intensity-medium" class="input" placeholder="明显影响">
+          </div>
+          <div class="form-group">
+            <label>大变化说明</label>
+            <input type="text" id="var-intensity-large" class="input" placeholder="重大影响">
+          </div>
+          <div class="form-group">
+            <label>重复衰减</label>
+            <div class="form-inline">
+              <label class="checkbox-label">
+                <input type="checkbox" id="var-repeat-enabled" checked>
+                启用
+              </label>
+              <label>
+                窗口消息数
+                <input type="number" id="var-repeat-window" class="input input-sm" value="5" min="1" max="20">
+              </label>
+              <label>
+                衰减倍率
+                <input type="number" id="var-repeat-multiply" class="input input-sm" value="0.5" min="0" max="1" step="0.1">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 阶段配置 -->
+        <div id="tab-stages" class="tab-content">
+          <div class="stages-header">
+            <p class="hint">配置变量的阶段划分，阶段区间不应重叠</p>
+            <button id="btn-add-stage" class="btn btn-secondary btn-sm">+ 添加阶段</button>
+          </div>
+          <div id="stages-list" class="stages-list">
+            <!-- 动态生成 -->
+          </div>
+        </div>
+
+        <!-- 高级设置 -->
+        <div id="tab-advanced" class="tab-content">
+          <div class="form-group">
+            <label>初始化策略</label>
+            <select id="var-init" class="input">
+              <option value="fixed_default">固定默认值</option>
+              <option value="temporary_default_pending" selected>临时默认 + 待确认</option>
+              <option value="manual_confirm">手动确认</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>别名（逗号分隔）</label>
+            <input type="text" id="var-aliases" class="input" placeholder="亲密度,关系,信任">
+          </div>
+          <div class="form-group">
+            <label>排除事件（逗号分隔）</label>
+            <input type="text" id="var-exclude" class="input" placeholder="普通问候,无关闲聊">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline modal-cancel">取消</button>
+        <button id="btn-save-variable" class="btn btn-primary">保存变量</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 明确事件模态框 -->
+  <div id="modal-explicit" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>添加明确事件</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>事件描述</label>
+          <input type="text" id="explicit-desc" class="input" placeholder="送喜欢的礼物">
+        </div>
+        <div class="form-group">
+          <label>关联变量</label>
+          <select id="explicit-variable" class="input">
+            <!-- 动态填充 -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>方向</label>
+          <select id="explicit-direction" class="input">
+            <option value="positive">正向</option>
+            <option value="negative">负向</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>强度</label>
+          <select id="explicit-intensity" class="input">
+            <option value="small">小</option>
+            <option value="medium" selected>中</option>
+            <option value="large">大</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline modal-cancel">取消</button>
+        <button id="btn-save-explicit" class="btn btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 模板选择模态框 -->
+  <div id="modal-template" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>选择模板</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>确定要使用此模板吗？这将覆盖当前配置。</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline modal-cancel">取消</button>
+        <button id="btn-confirm-template" class="btn btn-primary">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 提示框 -->
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
