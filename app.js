@@ -1452,6 +1452,20 @@ document.addEventListener('DOMContentLoaded', function() {
   // 新建配置
   $('#btn-new').addEventListener('click', newConfig);
 
+  // 移动端按钮
+  const btnNewMobile = $('#btn-new-mobile');
+  const btnImportMobile = $('#btn-import-mobile');
+  const btnSaveMobile = $('#btn-save-mobile');
+  const btnExportMobile = $('#btn-export-mobile');
+
+  if (btnNewMobile) btnNewMobile.addEventListener('click', newConfig);
+  if (btnImportMobile) btnImportMobile.addEventListener('click', importFromFile);
+  if (btnSaveMobile) btnSaveMobile.addEventListener('click', function() {
+    saveToStorage();
+    showToast('草稿已保存', 'success');
+  });
+  if (btnExportMobile) btnExportMobile.addEventListener('click', downloadConfig);
+
   // 保存草稿
   $('#btn-save-draft').addEventListener('click', function() {
     saveToStorage();
